@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members Area — MNM Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background: var(--black); min-height: 100vh; }
+
+    /* ─── LAYOUT ─── */
+    .members-wrap { padding-top: calc(var(--nav-h) + 50px); padding-bottom: 120px; }
+
+    /* ─── HEADER ─── */
+    .members-header {
+      border-bottom: 1px solid var(--grey-line);
+      padding-bottom: 2.5rem;
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .members-header-left .welcome {
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 0.5rem;
+    }
+    .members-header-left h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      color: var(--white);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+    .members-header-left .email-tag {
+      font-size: 0.85rem;
+      color: var(--white-mute);
+      margin-top: 0.6rem;
+    }
+    .logout-btn {
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      border: 1px solid var(--grey-line);
+      padding: 10px 22px;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* ─── LOADING ─── */
+    .loading-state { text-align: center; padding: 80px 0; }
+    .loading-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--grey-line);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state p { color: var(--white-mute); font-size: 0.9rem; }
+
+    /* ─── AUTH REQUIRED ─── */
+    .auth-required { display: none; text-align: center; padding: 120px 20px; }
+    .auth-required h2 { font-family: var(--font-display); font-size: 2rem; color: var(--white); margin-bottom: 1rem; }
+    .auth-required p { color: var(--white-dim); margin-bottom: 2rem; }
+
+    /* ─── SECTION DIVIDER ─── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .section-divider h2 {
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      white-space: nowrap;
+    }
+    .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--grey-line); }
+
+    /* ─── SUBSCRIPTION CARD — FULL WIDTH HORIZONTAL LAYOUT ─── */
+    .sub-card-full {
+      background: var(--black-card);
+      border: 1px solid var(--grey-line);
+      margin-bottom: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .sub-card-full:hover { background: var(--black-card2); }
+    .sub-card-full::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--red);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s ease;
+    }
+    .sub-card-full:hover::before { transform: scaleY(1); }
+
+    .sub-card-inner {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 200px;
+    }
+
+    /* Left panel — product info */
+    .sub-card-left {
+      padding: 2.5rem;
+      border-right: 1px solid var(--grey-line);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sub-tag {
+      font-family: var(--font-condensed);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 0.6rem;
+    }
+    .sub-card-left h3 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 0.8rem;
+    }
+    .sub-card-left p {
+      font-size: 0.85rem;
+      color: var(--white-dim);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    /* Right panel — content/months */
+    .sub-card-right {
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .sub-card-right-label {
+      font-family: var(--font-condensed);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      margin-bottom: 1rem;
+    }
+
+    /* Month rows */
+    .month-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.2rem 1.5rem;
+      border: 1px solid var(--grey-line);
+      background: rgba(255,255,255,0.02);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .month-row.unlocked {
+      border-color: rgba(249,30,15,0.25);
+      background: rgba(249,30,15,0.04);
+    }
+    .month-row-left { display: flex; align-items: center; gap: 1rem; flex: 1; }
+    .month-number {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--grey-line);
+      line-height: 1;
+      min-width: 40px;
+    }
+    .month-row.unlocked .month-number { color: var(--red); }
+    .month-info {}
+    .month-status {
+      font-family: var(--font-condensed);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      margin-bottom: 3px;
+    }
+    .month-row.unlocked .month-status { color: var(--red); }
+    .month-label {
+      font-size: 0.9rem;
+      color: var(--white-dim);
+      font-weight: 500;
+    }
+    .month-row.unlocked .month-label { color: var(--white); }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--white);
+      border: 1px solid var(--grey-line);
+      padding: 10px 20px;
+      background: transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .download-btn:hover { border-color: var(--red); color: var(--red); background: rgba(249,30,15,0.06); }
+    .coming-soon-tag {
+      font-family: var(--font-condensed);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      padding: 8px 14px;
+      border: 1px solid var(--grey-line);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .locked-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-condensed);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--white-mute);
+      padding: 8px 14px;
+      border: 1px solid var(--grey-line);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ─── OTP GRID ─── */
+    .otp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--grey-line);
+      margin-bottom: 4rem;
+    }
+    .otp-card {
+      background: var(--black-card);
+      padding: 2rem;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .otp-card:hover { background: var(--black-card2); }
+    .otp-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--red);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s ease;
+    }
+    .otp-card:hover::before { transform: scaleY(1); }
+    .otp-tag {
+      font-family: var(--font-condensed);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 0.6rem;
+    }
+    .otp-card h3 {
+      font-family: var(--font-condensed);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .otp-card p {
+      font-size: 0.84rem;
+      color: var(--white-dim);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      background: var(--black-card);
+      border: 1px solid var(--grey-line);
+      padding: 3rem;
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.5rem; color: var(--white); margin-bottom: 0.8rem; }
+    .empty-state p { color: var(--white-dim); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .sub-card-inner { grid-template-columns: 1fr; }
+      .sub-card-left { border-right: none; border-bottom: 1px solid var(--grey-line); }
+      .otp-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .members-header { flex-direction: column; align-items: flex-start; }
+      .otp-grid { grid-template-columns: 1fr; }
+      .month-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="images/a25d11a0684fbc451915087ff3bc992e.png" alt="MNM Fitness" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="programs.html">Programs</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="login.html">My Account</a></li>
+        <li><a href="contact.html" class="nav-cta">Book A Call</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+  <div class="nav-mobile">
+    <a href="index.html">Home</a>
+    <a href="programs.html">Programs</a>
+    <a href="contact.html">Contact Us</a>
+    <a href="login.html">My Account</a>
+    <a href="contact.html" class="nav-cta">Book A Call</a>
+  </div>
+
+  <!-- Not logged in -->
+  <div class="auth-required" id="authRequired">
+    <div class="container">
+      <h2>Members Only</h2>
+      <p>You need to be logged in to access this area.</p>
+      <a href="login.html" class="btn btn-primary">Login to Your Account</a>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="members-wrap container" id="membersContent" style="display:none;">
+
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <p>Loading your account...</p>
+    </div>
+
+    <div id="dashboardContent" style="display:none;">
+
+      <!-- Header -->
+      <div class="members-header">
+        <div class="members-header-left">
+          <div class="welcome">Members Area</div>
+          <h1>Welcome Back</h1>
+          <p class="email-tag" id="memberEmail"></p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+      </div>
+
+      <!-- Subscriptions -->
+      <div id="subsSection">
+        <div class="section-divider"><h2>Your Subscriptions</h2></div>
+        <div id="subsGrid"></div>
+      </div>
+
+      <!-- One-Time Purchases -->
+      <div id="otpSection">
+        <div class="section-divider"><h2>Your Purchases</h2></div>
+        <div class="otp-grid" id="otpGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script>
+    const WORKER_URL = 'https://mnmxfitness.ca';
+
+    const SUBSCRIPTION_PRODUCTS = {
+      '6-week-training-block': {
+        name: 'MNM 6 Week Training Block',
+        tag: 'Monthly Subscription',
+        desc: 'Your structured 6-week training system. New blocks unlock each month as you renew.',
+        months: {
+          1: { label: 'Protocol I — Foundation', file: '6-week-training-block/mnm-6-week-block-protocol-1.pdf' },
+          2: { label: 'Protocol II — Progressive Overload', file: null },
+          3: { label: 'Protocol III — Intensity Phase', file: null },
+        }
+      },
+      'training-vault': {
+        name: 'MNM Training Vault',
+        tag: 'Monthly Subscription',
+        desc: 'Access the continuously updated MNM training video library.',
+        months: {}
+      },
+      'weak-point-specialization': {
+        name: 'MNM Weak Point Specialization',
+        tag: 'Monthly Subscription',
+        desc: 'Targeted training blocks to address lagging muscle groups.',
+        months: {}
+      },
+      'meal-vault': {
+        name: 'MNM Meal Vault',
+        tag: 'Monthly Subscription',
+        desc: 'High-protein, performance-focused meal collection.',
+        months: {}
+      }
+    };
+
+    const OTP_PRODUCTS = {
+      'pre-post-workout-meals': {
+        name: 'MNM Pre/Post Workout Meals',
+        tag: 'One-Time Purchase',
+        desc: 'Performance-driven meal options for training support and recovery.',
+        file: 'one-time-products/pre-post-workout-meals.pdf'
+      },
+      'carbs-protein-guide': {
+        name: 'Simple/Complex Carbs + Best Protein Sources',
+        tag: 'One-Time Purchase',
+        desc: 'Clear breakdown of carbohydrate types and high-quality protein sources.',
+        file: 'one-time-products/carbs-protein-guide.pdf'
+      },
+      '7-day-detox': {
+        name: 'MNM 7 Day Detox & Dopamine Reset',
+        tag: 'One-Time Purchase',
+        desc: 'A structured reset to improve focus, discipline, and self-control.',
+        file: 'one-time-products/7-day-detox.pdf'
+      },
+      'fat-loss-blueprint': {
+        name: 'Fat Loss For Busy Men Blueprint',
+        tag: 'One-Time Purchase',
+        desc: 'Efficient fat-loss strategies for demanding schedules.',
+        file: 'one-time-products/fat-loss-blueprint.pdf'
+      },
+      'home-training-vault': {
+        name: 'MNM Home Training Vault',
+        tag: 'One-Time Purchase',
+        desc: 'Structured training programs requiring minimal equipment.',
+        file: 'one-time-products/home-training-vault.pdf'
+      },
+      'accountability-tracker': {
+        name: 'MNM Accountability Tracker',
+        tag: 'One-Time Purchase',
+        desc: 'Weekly tracking system for training, nutrition, and habits.',
+        file: 'one-time-products/accountability-tracker.pdf'
+      }
+    };
+
+    async function loadMember() {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/member`, { credentials: 'include' });
+        if (res.status === 401) {
+          document.getElementById('membersContent').style.display = 'none';
+          document.getElementById('authRequired').style.display = 'block';
+          return;
+        }
+        const member = await res.json();
+        renderDashboard(member);
+      } catch (err) {
+        document.getElementById('membersContent').style.display = 'none';
+        document.getElementById('authRequired').style.display = 'block';
+      }
+    }
+
+    function renderDashboard(member) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+      document.getElementById('memberEmail').textContent = member.email;
+
+      const subsGrid = document.getElementById('subsGrid');
+      if (member.subscriptions && member.subscriptions.length > 0) {
+        member.subscriptions.forEach(subId => {
+          const product = SUBSCRIPTION_PRODUCTS[subId];
+          if (!product) return;
+          const monthsActive = member.monthsActive?.[subId] || 1;
+          subsGrid.appendChild(renderSubscriptionCard(product, monthsActive));
+        });
+      } else {
+        document.getElementById('subsSection').innerHTML = `
+          <div class="section-divider"><h2>Your Subscriptions</h2></div>
+          <div class="empty-state">
+            <h3>No Active Subscriptions</h3>
+            <p>Subscribe to unlock structured training programs, meal plans, and more.</p>
+            <a href="programs.html#subscriptions" class="btn btn-primary">View Subscriptions</a>
+          </div>`;
+      }
+
+      const otpGrid = document.getElementById('otpGrid');
+      if (member.products && member.products.length > 0) {
+        member.products.forEach(productId => {
+          const product = OTP_PRODUCTS[productId];
+          if (!product) return;
+          otpGrid.appendChild(renderOTPCard(product));
+        });
+      } else {
+        document.getElementById('otpSection').innerHTML = `
+          <div class="section-divider"><h2>Your Purchases</h2></div>
+          <div class="empty-state">
+            <h3>No Purchases Yet</h3>
+            <p>Pick up one of our standalone guides and tools.</p>
+            <a href="programs.html#otp" class="btn btn-outline">View Products</a>
+          </div>`;
+      }
+    }
+
+    function renderSubscriptionCard(product, monthsActive) {
+      const card = document.createElement('div');
+      card.className = 'sub-card-full';
+
+      const monthEntries = Object.entries(product.months || {});
+      let monthsHtml = '';
+
+      if (monthEntries.length > 0) {
+        monthsHtml = `<p class="sub-card-right-label">Content Access</p>`;
+        monthEntries.forEach(([month, content]) => {
+          const isUnlocked = monthsActive >= parseInt(month);
+          const actionHtml = isUnlocked
+            ? (content.file
+                ? `<a href="files/${content.file}" download class="download-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download PDF
+                  </a>`
+                : `<span class="coming-soon-tag">Coming Soon</span>`)
+            : `<span class="locked-tag">🔒 Renew to Unlock</span>`;
+
+          monthsHtml += `
+            <div class="month-row ${isUnlocked ? 'unlocked' : ''}">
+              <div class="month-row-left">
+                <div class="month-number">0${month}</div>
+                <div class="month-info">
+                  <div class="month-status">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+                  <div class="month-label">${content.label}</div>
+                </div>
+              </div>
+              ${actionHtml}
+            </div>`;
+        });
+      } else {
+        monthsHtml = `<p style="color:var(--white-mute);font-size:0.85rem;">Content coming soon.</p>`;
+      }
+
+      card.innerHTML = `
+        <div class="sub-card-inner">
+          <div class="sub-card-left">
+            <div>
+              <div class="sub-tag">${product.tag}</div>
+              <h3>${product.name}</h3>
+              <p>${product.desc}</p>
+            </div>
+          </div>
+          <div class="sub-card-right">
+            ${monthsHtml}
+          </div>
+        </div>`;
+      return card;
+    }
+
+    function renderOTPCard(product) {
+      const card = document.createElement('div');
+      card.className = 'otp-card';
+      card.innerHTML = `
+        <div class="otp-tag">${product.tag}</div>
+        <h3>${product.name}</h3>
+        <p>${product.desc}</p>
+        ${product.file
+          ? `<a href="files/${product.file}" download class="download-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </a>`
+          : `<span class="coming-soon-tag">Coming Soon</span>`}`;
+      return card;
+    }
+
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      await fetch(`${WORKER_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
+      window.location.href = 'login.html';
+    });
+
+    document.getElementById('membersContent').style.display = 'block';
+    loadMember();
+  </script>
+</body>
+</html>
